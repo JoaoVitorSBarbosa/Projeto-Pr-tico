@@ -122,10 +122,7 @@ int binRecursivaID(registro vetor[], int inicio, int fim, int buscado) {
     return -1;
 }
 
-int buscaDescritor(registro vetor[], string buscado) {
-    while (false) { 
-    }
-}
+int buscaDescritor(registro vetor[], string buscado) { return 0; }
 
 void apaga(registro vetor[], int pos) {  // marca id negativo
     int aux = vetor[pos].ID;
@@ -142,7 +139,7 @@ void imprime(registro vetor[], int pos,
     }
 }
 
-void insere(registro novo) {}  // ordenado
+void insere(registro novo[]) {}  // ordenado
 
 int main() {
     uint8_t opcao = menu();
@@ -150,13 +147,13 @@ int main() {
 
 
     switch (opcao) {
-        case 1: insere (vetor, i);
+        case 1: insere (vetor);
             break;
-        case 2: imprime (vetor, i);
+        case 2: imprime (vetor, 0, 50);
             break;
-        case 3:  buscaDescritor(vetor, i);
+        case 3:  buscaDescritor(vetor, "");
             break;
-        case 4: apaga(vetor, i);
+        case 4: apaga(vetor, 0);
             break;
     }
 }
