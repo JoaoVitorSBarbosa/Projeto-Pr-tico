@@ -3,20 +3,60 @@
     */
 
 #include <stdio.h>
+
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
 using namespace std;
 struct registro {
-    int ID = 0;
-    char  descritor[40];
-    char certificado[10];
+    long ID = 0;
+    string descritor = "";
+    string certificado = "";
     float precoCompra = 0;
     float precoVenda = 0;
 };
 
-int binRecursivaID(registro vetor[], int inicio, int fim, int buscado);
+void clearScreen() {
+#ifdef WINDOWS
+    std::system("cls");
+#else
+    // Assume POSIX
+    std::system("clear");
+#endif
+}
+
+unsigned int getNumRegistros() {
+    string linha;
+    ifstream infile("base8.csv");
+    int numRegistros;
+    while (getline(infile, linha)) {  // Ler cada linha do arquivo CSV
+        numRegistros++;
+    }
+    infile.close();
+    return numRegistros;
+}
+
+string leCelula(ifstream &arquivo) {
+    string celula;
+    char c;
+    arquivo.read(&c, 1);
+    if (c == '\"') {
+        arquivo.read(&c, 1);  // elimina a aspas
+        do {
+            celula += c;
+            arquivo.read(&c, 1);
+        } while (c != '\"');
+        arquivo.read(&c, 1);  // elimina o ";"
+    } else {
+        do {
+            celula += c;
+            arquivo.read(&c, 1);
+        } while (c != ';' and c != '\n' and !arquivo.eof());
+    }
+    return celula;
+}
 
 int Converte() {                        // converte o arquivo em binario
     std::ifstream infile("base8.csv");  // Abrir o arquivo CSV
@@ -33,7 +73,7 @@ int Converte() {                        // converte o arquivo em binario
         inteiro = std::stoi(texto);
         std::getline(ss, texto);  // Extrair a string
         outfile.write(
-            reinterpret_cast<char*>(&inteiro),
+            reinterpret_cast<char *>(&inteiro),
             sizeof(int));  // Escrever o valor inteiro no arquivo binário
         outfile.write(texto.c_str(),
                       texto.size());  // Escrever a string no arquivo binário
@@ -42,6 +82,72 @@ int Converte() {                        // converte o arquivo em binario
     infile.close();   // Fechar o arquivo CSV
     outfile.close();  // Fechar o arquivo binário
     return 0;
+}
+
+void lerArquivo(registro produtos[]) {
+    ifstream infile("base8.csv");  // Abrir o arquivo CSV
+    int coluna = 0;
+    int linha;
+    while (!infile.eof()) {  // Ler cada linha do arquivo CSV
+        // cout << linha << endl;
+        string celula = leCelula(infile);
+        switch (coluna) {
+            case 0:
+                produtos[linha].ID = stol(celula);
+                break;
+            case 1:
+                produtos[linha].descritor = celula;
+                break;
+            case 2: {
+                produtos[linha].certificado = celula;
+                break;
+            }
+            case 3: {
+                // cout << celula << endl;
+                if (celula.find(',') < celula.length())
+                    celula.replace(celula.find(','), 1, ".");
+                produtos[linha].precoCompra = stof(celula);
+                break;
+            }
+            case 4: {
+                // cout << celula << endl;
+                if (celula.find(',') < celula.length())
+                    celula.replace(celula.find(','), 1, ".");
+                produtos[linha].precoVenda = stof(celula);
+                linha++;
+                break;
+            }
+            default:
+                break;
+        }
+
+        if (coluna == 4) {
+            coluna = 0;
+        } else {
+            coluna++;
+        }
+    }
+
+    infile.close();
+}
+
+void gravarArquivo() {  // ordenado
+    registro novoRegistro;
+    ofstream outfile("base08.bin", std::ios::out | std::ios::binary);
+
+    cout << "Insira o ID" << endl;
+    cin >> novoRegistro.ID;
+    cout << "Insira o descritor" << endl;
+    cin >> novoRegistro.descritor;
+    cout << "Insira o certificado" << endl;
+    cin >> novoRegistro.certificado;
+    cout << "Insira o precoCompra" << endl;
+    cin >> novoRegistro.precoCompra;
+    cout << "Insira o precoVenda" << endl;
+    cin >> novoRegistro.precoVenda;
+    clearScreen();
+
+    int posFinal = getNumRegistros() + 1;
 }
 
 void swap(registro vetor[], int pos1, int pos2) {
@@ -122,38 +228,67 @@ int binRecursivaID(registro vetor[], int inicio, int fim, int buscado) {
     return -1;
 }
 
-int buscaDescritor(registro vetor[], string buscado) { return 0; }
+int buscaDescritor(registro vetor[], string buscado) {
+    int i = 0;
+    bool cond = false;
+    while (i < getNumRegistros() && !cond) {
+        if (vetor[i].descritor == buscado) {
+            cond = true;
+            return i;
+        }
+    }
+    return -1;
+}
 
 void apaga(registro vetor[], int pos) {  // marca id negativo
     int aux = vetor[pos].ID;
     vetor[pos].ID = -1 * aux;
 }
 
+long ID = 0;
+    string descritor = "";
+    string certificado = "";
+    float precoCompra = 0;
+    float precoVenda = 0;
+
 void imprime(registro vetor[], int pos,
              int n) {  // loop de couts a partir da posicao dada
-
+    cout << "\t ID \t | \t \t \t Descritor \t \t \t | \t Certificado \t | \t Preço Compra \t | Preço Venda"<<endl<<endl;
     for (int i = pos; i < n; i++) {
-        cout << vetor[i].ID << " " << vetor[i].descritor << " "
-             << vetor[i].certificado << " " << vetor[i].precoCompra << " "
-             << vetor[i].precoVenda << ";" << endl;
+        if (vetor[i].ID > 0) {
+            cout << vetor[i].ID << "\t" << " |";
+            cout << "\t"<< vetor[i].descritor << "\t \t\t" << " |";
+            cout << vetor[i].certificado << "\t" << " |";
+            cout << "\t"<< vetor[i].precoCompra << "\t" << " |";
+            cout << "\t"<< vetor[i].precoVenda << "\t" << " |";
+            cout << "\n";
+        }
     }
 }
 
-void insere(registro novo[]) {}  // ordenado
-
 int main() {
     uint8_t opcao = menu();
-    registro vetor[50];
+    registro produtos[getNumRegistros()];
 
+    lerArquivo(produtos);
 
-    switch (opcao) {
-        case 1: insere (vetor);
-            break;
-        case 2: imprime (vetor, 0, 50);
-            break;
-        case 3:  buscaDescritor(vetor, "");
-            break;
-        case 4: apaga(vetor, 0);
-            break;
+    while (opcao != 5) {
+        switch (opcao) {
+            case 1:
+                gravarArquivo();
+                break;
+            case 2:
+                imprime(produtos, 0, getNumRegistros());
+                break;
+            case 3:
+                buscaDescritor(produtos, "");
+                break;
+            case 4:
+                apaga(produtos, 0);
+                break;
+        }
+        opcao = menu();
     }
+    //clearScreen();
+    cout << "Obrigado pela preferência!";
 }
