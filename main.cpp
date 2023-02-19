@@ -3,7 +3,7 @@
     */
 
 #include <stdio.h>
-
+#include <cstring>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -245,20 +245,21 @@ void apaga(registro vetor[], int pos) {  // marca id negativo
     vetor[pos].ID = -1 * aux;
 }
 
-long ID = 0;
-    string descritor = "";
-    string certificado = "";
-    float precoCompra = 0;
-    float precoVenda = 0;
-
+void imprimeEspacos(int qtdeEspacos) {
+    for(int i = 0; i < qtdeEspacos; i++) {
+        cout << " ";
+    }
+}
 void imprime(registro vetor[], int pos,
              int n) {  // loop de couts a partir da posicao dada
-    cout << "\t ID \t | \t \t \t Descritor \t \t \t | \t Certificado \t | \t Preço Compra \t | Preço Venda"<<endl<<endl;
+    cout << "    ID \t \t| \t \t \t \t \t \t Descritor\t\t\t \t\t \t        | \t Certificado     | Preço Compra  |  Preço Venda  |"<<endl<<endl;
     for (int i = pos; i < n; i++) {
         if (vetor[i].ID > 0) {
-            cout << vetor[i].ID << "\t" << " |";
-            cout << "\t"<< vetor[i].descritor << "\t \t\t" << " |";
-            cout << vetor[i].certificado << "\t" << " |";
+            cout << vetor[i].ID << "  " << " |";
+            cout << " " << vetor[i].descritor;
+            imprimeEspacos(110 - strlen(vetor[i].descritor.c_str()));
+            cout << "|";
+            cout << "\t" << vetor[i].certificado << "\t" << " |";
             cout << "\t"<< vetor[i].precoCompra << "\t" << " |";
             cout << "\t"<< vetor[i].precoVenda << "\t" << " |";
             cout << "\n";
