@@ -3,8 +3,9 @@
     */
 
 #include <stdio.h>
-#include <cstring>
+
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -215,7 +216,7 @@ int menu() {  // Criado um menu onde o usuário escolhe uma opcao numerica.
     return opc;
 }
 
-int binRecursivaID(registro vetor[], int inicio, int fim, int buscado) {
+int binRecursivaID(registro vetor[], int inicio, int fim, long buscado) {
     if (inicio <= fim) {
         int meio = (inicio + fim) / 2;
         if (buscado > vetor[meio].ID)
@@ -237,40 +238,54 @@ int buscaDescritor(registro vetor[], string buscado) {
             return i;
         }
     }
-    return -1;
-}
-
-void apaga(registro vetor[], int pos) {  // marca id negativo
-    int aux = vetor[pos].ID;
-    vetor[pos].ID = -1 * aux;
+    return 0;
 }
 
 void imprimeEspacos(int qtdeEspacos) {
-    for(int i = 0; i < qtdeEspacos; i++) {
+    for (int i = 0; i < qtdeEspacos; i++) {
         cout << " ";
     }
 }
-void imprime(registro vetor[], int pos,
-             int n) {  // loop de couts a partir da posicao dada
-    cout << "    ID \t \t| \t \t \t \t \t \t Descritor\t\t\t \t\t \t        | \t Certificado     | Preço Compra  |  Preço Venda  |"<<endl<<endl;
-    for (int i = pos; i < n; i++) {
+void imprime(registro vetor[], int inicio,
+             int fim) {  // loop de couts a partir da posicao dada
+    cout << "    ID \t \t| \t \t \t \t \t \t Descritor\t\t\t \t\t \t        | "
+            "\t Certificado     | Preço Compra  |  Preço Venda  |"
+         << endl
+         << endl;
+    for (int i = inicio; i < fim; i++) {
         if (vetor[i].ID > 0) {
-            cout << vetor[i].ID << "  " << " |";
+            cout << vetor[i].ID << "  "
+                 << " |";
             cout << " " << vetor[i].descritor;
             imprimeEspacos(110 - strlen(vetor[i].descritor.c_str()));
             cout << "|";
-            cout << "\t" << vetor[i].certificado << "\t" << " |";
-            cout << "\t"<< vetor[i].precoCompra << "\t" << " |";
-            cout << "\t"<< vetor[i].precoVenda << "\t" << " |";
+            cout << "\t" << vetor[i].certificado << "\t"
+                 << " |";
+            cout << "\t" << vetor[i].precoCompra << "\t"
+                 << " |";
+            cout << "\t" << vetor[i].precoVenda << "\t"
+                 << " |";
             cout << "\n";
         }
     }
 }
 
+void apaga(registro vetor[]) {  // marca id negativo
+    cout << "Qual o ID do registro deseja apagar?";
+    int numRegistros = getNumRegistros();
+    imprime(vetor, 0, numRegistros);
+    int idToDelete = 0;
+    cin >> idToDelete;
+    int pos = binRecursivaID(vetor, 0, numRegistros, idToDelete);
+    int aux = vetor[pos].ID;
+    vetor[pos].ID = -1 * aux;
+    clearScreen();
+    cout << "Registro apagado com sucesso!";
+}
+
 int main() {
     uint8_t opcao = menu();
     registro produtos[getNumRegistros()];
-
     lerArquivo(produtos);
 
     while (opcao != 5) {
@@ -281,15 +296,23 @@ int main() {
             case 2:
                 imprime(produtos, 0, getNumRegistros());
                 break;
-            case 3:
-                buscaDescritor(produtos, "");
+            case 3: {
+                long id;
+                cin >> id;
+                int idBuscado = binRecursivaID(produtos, 0, getNumRegistros(), id);
+                if (idBuscado >= 0) {
+                imprime(produtos, idBuscado, idBuscado + 1);
+                } else {
+                    cout << "Esse registro não existe ou foi deletado" << endl;
+                }
                 break;
+            }
             case 4:
-                apaga(produtos, 0);
+                apaga(produtos);
                 break;
         }
         opcao = menu();
     }
-    //clearScreen();
+    clearScreen();
     cout << "Obrigado pela preferência!";
 }
